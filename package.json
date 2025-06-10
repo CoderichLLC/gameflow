@@ -16,6 +16,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@coderich/dev": "^0.1.0"
+    "@coderich/dev": "0.4.2"
   }
 }

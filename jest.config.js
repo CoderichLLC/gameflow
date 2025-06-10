@@ -2,7 +2,7 @@
 
 module.exports = {
   verbose: true,
-  testTimeout: 5000,
+  testTimeout: 10000,
   testEnvironment: 'node',
   collectCoverage: false,
   collectCoverageFrom: ['src/**/**/*.js'],

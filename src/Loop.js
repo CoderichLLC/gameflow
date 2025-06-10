@@ -5,7 +5,7 @@ module.exports = class Loop {
   constructor(...steps) {
     const action = new Action('loop', steps.flat());
 
-    return (data, context = {}) => {
+    const fn = (data, context = {}) => {
       let promise;
 
       const loop = () => {
@@ -18,7 +18,10 @@ module.exports = class Loop {
       // If the parent is aborted, abort the current promise
       context.promise?.onAbort(reason => promise.abort(reason));
 
-      return loop();
+      const $loop = loop();
+      return fn.async ? undefined : $loop;
     };
+
+    return fn;
   }
 };

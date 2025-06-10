@@ -48,7 +48,7 @@ module.exports = class Action {
           get() {
             return () => {
               paused ??= withResolvers();
-              steps.unshift(paused.promise);
+              steps.unshift(() => paused.promise);
               return this;
             };
           },
