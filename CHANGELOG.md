@@ -1,5 +1,5 @@
-## 1.3.0
-- Added Cascade class
+## 1.3.1
+- Added Force class
 - Stream supports batch
 - abortListeners now an array like the other listeners
 - startListeners called AFTER first step is called
