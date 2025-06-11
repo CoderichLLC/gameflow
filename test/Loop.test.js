@@ -24,26 +24,6 @@ describe('Loop', () => {
     expect(num).toBeLessThan(6);
   });
 
-  test('Async Loop Class', async () => {
-    let num = 0;
-
-    const action = new Action('process', [
-      (_, { abort }) => {
-        timeout(2500).then(() => abort('timeout'));
-      },
-
-      Object.assign(new Loop(async () => {
-        await timeout(500);
-        num++;
-      }), { async: true }),
-    ]);
-
-    action();
-    await timeout(4500);
-    expect(num).toBeGreaterThan(4);
-    expect(num).toBeLessThan(6);
-  });
-
   test('Abort loop from action', async () => {
     let num = 0;
     const action = new Action('loop', new Loop(() => timeout(100).then(() => num++)));

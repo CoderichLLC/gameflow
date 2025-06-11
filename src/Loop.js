@@ -1,11 +1,14 @@
 const Action = require('./Action');
 const { AbortError } = require('./Error');
 
+/**
+ * Continuously repeat steps; lifecycle is bound to the parent
+ */
 module.exports = class Loop {
   constructor(...steps) {
     const action = new Action('loop', steps.flat());
 
-    const fn = (data, context = {}) => {
+    return (data, context) => {
       let promise;
 
       const loop = () => {
@@ -18,10 +21,7 @@ module.exports = class Loop {
       // If the parent is aborted, abort the current promise
       context.promise?.onAbort(reason => promise.abort(reason));
 
-      const $loop = loop();
-      return fn.async ? undefined : $loop;
+      return loop();
     };
-
-    return fn;
   }
 };

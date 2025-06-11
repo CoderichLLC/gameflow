@@ -14,9 +14,10 @@ module.exports = class Action {
       // Instead of emitting events like crazy, we allow callback listeners
       const listeners = [];
       const startListeners = [];
+      const abortListeners = [];
 
       // Internal state
-      let started = false, aborted = false, reason, paused, currentProcess, onAbort;
+      let started = false, aborted = false, reason, paused, currentProcess;
 
       // The action is a promise that is resolved or rejected
       const { promise, resolve, reject } = withResolvers();
@@ -26,7 +27,7 @@ module.exports = class Action {
         aborted = true;
         reason = message;
         reject(new AbortError('Action Aborted', { message }));
-        onAbort?.();
+        abortListeners.forEach(l => l());
       };
 
       // We decorate (and return) the promise with additional props
@@ -37,13 +38,13 @@ module.exports = class Action {
       }), {
         id: { value: id },
         steps: { value: steps.length },
-        abort: { get() { return (...args) => context.abort(...args) && this; } },
-        listen: { get() { return listener => listeners.push(listener) && this; } },
         aborted: { get: () => aborted },
         started: { get: () => started },
         reason: { get: () => reason },
+        abort: { get() { return (...args) => context.abort(...args) && this; } },
+        listen: { get() { return fn => listeners.push(fn) && this; } },
         onStart: { get() { return fn => startListeners.push(fn) && this; } },
-        onAbort: { value: (fn) => { onAbort = fn; } },
+        onAbort: { get() { return fn => abortListeners.push(fn) && this; } },
         pause: {
           get() {
             return () => {
@@ -73,10 +74,10 @@ module.exports = class Action {
             // Here we race the actual step vs the ability to abort it
             if (!aborted) {
               try {
-                if (!started) startListeners.forEach(l => l());
-                started = true;
                 currentProcess = Promise.resolve(step(value, context));
                 currentProcess.isStep = step instanceof Step;
+                if (!started) startListeners.forEach(l => l());
+                started = true;
                 Promise.race([promise, currentProcess]).then(res).catch(rej);
               } catch (e) {
                 rej(e);

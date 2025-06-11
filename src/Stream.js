@@ -2,7 +2,8 @@ const EventEmitter = require('./EventEmitter');
 
 module.exports = class Stream extends EventEmitter {
   #thunks;
-  #action;
+  #batch = 1;
+  #actions = [];
   #flowing = false;
   #paused = false;
   #closed = false;
@@ -21,6 +22,11 @@ module.exports = class Stream extends EventEmitter {
 
   length() {
     return this.#thunks.length;
+  }
+
+  batch(n) {
+    this.#batch = n;
+    return this;
   }
 
   pause() {
@@ -46,8 +52,8 @@ module.exports = class Stream extends EventEmitter {
   }
 
   abort(...args) {
-    this.#action?.abort(...args);
-    this.#emit('abort', this.#action);
+    this.#actions.forEach(action => action.abort(...args));
+    this.#emit('abort');
     return this.clear();
   }
 
@@ -66,7 +72,7 @@ module.exports = class Stream extends EventEmitter {
   }
 
   #emit(name) {
-    this.emit(name, { action: this.#action });
+    this.#actions.forEach(action => this.emit(name, { action }));
   }
 
   #reject(thunks) {
@@ -77,9 +83,9 @@ module.exports = class Stream extends EventEmitter {
   async #flow() {
     if (!this.#flowing && !this.#paused && this.#thunks.length) {
       this.#flowing = true;
-      this.#action = this.#thunks.shift()(); // The thunk becomes an action!
+      this.#actions = this.#thunks.splice(0, this.#batch).map(a => a());
       this.#emit('flow');
-      await this.#action;
+      await Promise.all(this.#actions);
       this.#flowing = false;
       this.#flow();
     }
