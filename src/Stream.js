@@ -4,6 +4,7 @@ module.exports = class Stream extends EventEmitter {
   #thunks;
   #batch = 1;
   #actions = [];
+  #chained = true;
   #flowing = false;
   #paused = false;
   #closed = false;
@@ -26,6 +27,11 @@ module.exports = class Stream extends EventEmitter {
 
   batch(n) {
     this.#batch = n;
+    return this;
+  }
+
+  chained(v) {
+    this.#chained = v;
     return this;
   }
 
@@ -85,7 +91,8 @@ module.exports = class Stream extends EventEmitter {
       this.#flowing = true;
       this.#actions = this.#thunks.splice(0, this.#batch).map(a => a());
       this.#emit('flow');
-      await Promise.all(this.#actions);
+      const promise = Promise.all(this.#actions);
+      if (this.#chained) await promise;
       this.#flowing = false;
       this.#flow();
     }

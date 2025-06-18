@@ -1,3 +1,6 @@
+## 1.4.0
+- Stream supports chained boolean
+
 ## 1.3.1
 - Added Force class
 - Stream supports batch
