@@ -1,25 +1,21 @@
-const Action = require('./Action');
-const { AbortError } = require('./Error');
+const { pipeline } = require('./Util');
 
 /**
- * Continuously repeat steps; lifecycle is bound to the parent
+ * Continuously repeat steps; lifecycle is bound to the parent context
  */
 module.exports = class Loop {
   constructor(...steps) {
-    const action = new Action('loop', steps.flat());
-
     return (data, context) => {
-      let promise;
+      let aborted = false;
+      const onAbort = () => (aborted = true);
+      context.promise.onAbort(onAbort);
+      context.stream?.once('abort', onAbort);
 
-      const loop = () => {
-        promise = action(data, context);
-        return promise.then((result) => {
-          return result instanceof AbortError ? context.abort(result) : loop();
-        });
+      const loop = async () => {
+        await pipeline(steps.flat().map(step => value => step(value, context)), data);
+        if (!aborted) await loop(data, context);
+        context.stream?.off('abort', onAbort);
       };
-
-      // If the parent is aborted, abort the current promise
-      context.promise?.onAbort(reason => promise.abort(reason));
 
       return loop();
     };
