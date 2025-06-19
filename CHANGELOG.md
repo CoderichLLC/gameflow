@@ -1,3 +1,6 @@
+## 1.5.0
+- EventEmitter.offFunction now accepts array/n args and returns the EventEmitter instance for chaining
+
 ## 1.4.0
 - Stream supports chained boolean
 

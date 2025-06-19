@@ -6,9 +6,9 @@ module.exports = class Emitter extends EventEmitter {
     super.emit('*', ...args);
   }
 
-  offFunction(fn) {
-    return this.eventNames().filter((eventName) => {
-      return this.listeners(eventName).includes(fn);
-    }).map(eventName => this.off(eventName, fn));
+  offFunction(...fns) {
+    fns = fns.flat();
+    this.eventNames().forEach(eventName => fns.forEach(fn => this.off(eventName, fn)));
+    return this;
   }
 };
