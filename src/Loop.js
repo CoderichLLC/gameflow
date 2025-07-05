@@ -12,7 +12,7 @@ module.exports = class Loop {
       context.stream?.once('abort', onAbort);
 
       const loop = async () => {
-        await pipeline(steps.flat().map(step => value => step(value, context)), data);
+        await pipeline(steps.flat().map(step => value => !aborted && step(value, context)), data);
         if (!aborted) await loop(data, context);
         context.stream?.off('abort', onAbort);
       };
