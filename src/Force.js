@@ -1,7 +1,7 @@
 const { pipeline } = require('./Util');
 
 /**
- * Continuously force-repeat the stream->action until the stream is aborted
+ * Continuously force-repeat the stream->action until the STREAM is aborted
  */
 module.exports = class Force {
   constructor(...steps) {

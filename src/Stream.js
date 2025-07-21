@@ -3,7 +3,7 @@ const EventEmitter = require('./EventEmitter');
 module.exports = class Stream extends EventEmitter {
   #thunks;
   #batch = 1;
-  #actions = [];
+  #actions = new Set();
   #chained = true;
   #flowing = false;
   #paused = false;
@@ -86,12 +86,21 @@ module.exports = class Stream extends EventEmitter {
     return this;
   }
 
+  #enqueue(thunks) {
+    thunks.forEach((thunk) => {
+      const action = Promise.resolve(thunk());
+      action.finally(() => this.#actions.delete(action));
+      this.#actions.add(action);
+    });
+    return this;
+  }
+
   async #flow() {
     if (!this.#flowing && !this.#paused && this.#thunks.length) {
       this.#flowing = true;
-      this.#actions = this.#thunks.splice(0, this.#batch).map(a => a());
+      this.#enqueue(this.#thunks.splice(0, this.#batch));
       this.#emit('flow');
-      const promise = Promise.all(this.#actions);
+      const promise = Promise.all(this.#actions.values());
       if (this.#chained) await promise;
       this.#flowing = false;
       this.#flow();

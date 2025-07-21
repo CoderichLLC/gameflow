@@ -1,3 +1,6 @@
+## 1.5.2
+- Fixed bug with stream.abort() incorrectly keeping track of actions in progress
+
 ## 1.5.0
 - EventEmitter.offFunction now accepts array/n args and returns the EventEmitter instance for chaining
 
