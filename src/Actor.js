@@ -36,23 +36,21 @@ module.exports = class Actor extends EventEmitter {
     });
   }
 
-  follow(sourcePromise, data) {
+  follow(followPromise, data) {
     let promise;
 
     const abort = reason => promise.abort(reason);
 
     // Follow the source steps
-    const sourceSteps = Array.from(new Array(sourcePromise.steps)).map((_, index) => {
+    const sourceSteps = Array.from(new Array(followPromise.steps)).map((_, index) => {
       return new Promise((resolve) => {
-        sourcePromise.then(() => { if (sourcePromise.aborted) abort('$source'); }).catch(abort);
-        sourcePromise.listen((step) => { if (step === index + 1) resolve(); });
+        followPromise.then(() => { if (followPromise.aborted) abort('$source'); }).catch(abort);
+        followPromise.listen((step) => { if (step === index + 1) resolve(); });
       });
     });
 
     // Delay execution until the source step is finished
-    promise = this.perform(sourcePromise.id, data).listen(step => sourceSteps[step - 1]);
-    promise.$follow = true;
-    return promise;
+    return this.perform(followPromise.id, data, { followPromise }).listen(step => sourceSteps[step - 1]);
   }
 
   static define(id) {

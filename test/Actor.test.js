@@ -51,7 +51,7 @@ describe('Actor', () => {
       expect(run).toHaveBeenCalledTimes(2);
       expect(look).toHaveBeenCalledTimes(2);
       expect(stretch).toHaveBeenCalledTimes(2);
-      expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+      expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor, followPromise: expect.anything() }));
       expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor: Actor.player1 }));
       done();
     });

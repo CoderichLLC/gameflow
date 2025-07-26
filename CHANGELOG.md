@@ -1,3 +1,6 @@
+## 1.6.0
+- No longer setting promise.$follow instead context.followPromise is set
+
 ## 1.5.2
 - Fixed bug with stream.abort() incorrectly keeping track of actions in progress
 
