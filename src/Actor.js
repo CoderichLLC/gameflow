@@ -23,17 +23,12 @@ module.exports = class Actor extends EventEmitter {
     return promise;
   }
 
-  stream(stream, action, data, context = {}) {
-    stream = stream instanceof Stream ? stream : Stream[stream];
-    context.stream = stream;
+  push(...args) {
+    return this.#stream(...args);
+  }
 
-    return new Promise((resolve, reject) => {
-      stream.push(() => {
-        const promise = this.perform(action, data, context);
-        promise.then(resolve).catch(reject);
-        return promise; // We must return promise because that has all the methods (ie. abort())
-      });
-    });
+  unshift(stream, action, data, context = {}, op = 'unshift') {
+    return this.#stream(stream, action, data, context, op);
   }
 
   follow(followPromise, data) {
@@ -51,6 +46,24 @@ module.exports = class Actor extends EventEmitter {
 
     // Delay execution until the source step is finished
     return this.perform(followPromise.id, data, { followPromise }).listen(step => sourceSteps[step - 1]);
+  }
+
+  // Backwards compat - to be removed
+  stream(...args) {
+    return this.#stream(...args);
+  }
+
+  #stream(stream, action, data, context = {}, op = 'push') {
+    stream = stream instanceof Stream ? stream : Stream[stream];
+    context.stream = stream;
+
+    return new Promise((resolve, reject) => {
+      stream[op](() => {
+        const promise = this.perform(action, data, context);
+        promise.then(resolve).catch(reject);
+        return promise; // We must return promise because that has all the methods (ie. abort())
+      });
+    });
   }
 
   static define(id) {

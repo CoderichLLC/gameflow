@@ -1,3 +1,6 @@
+## 1.7.0
+- actor.push and actor.unshift; actor.stream deprecated
+
 ## 1.6.0
 - No longer setting promise.$follow instead context.followPromise is set
 
