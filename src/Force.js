@@ -10,7 +10,7 @@ module.exports = class Force {
       const onAbort = () => (aborted = true);
       context.stream.once('abort', onAbort);
       await pipeline(steps.flat().map(step => value => !aborted && step(value, context)), data);
-      if (!aborted) context.actor.stream(context.stream, context.action);
+      if (!aborted) context.actor.stream(context.stream, context.action, data); // Repeat with original data
       context.stream.off('abort', onAbort);
     };
   }

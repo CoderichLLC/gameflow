@@ -1,3 +1,6 @@
+## 1.7.1
+- Bug fix with Force not passing data when interating
+
 ## 1.7.0
 - actor.push and actor.unshift; actor.stream deprecated...
 
