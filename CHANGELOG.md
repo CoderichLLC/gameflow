@@ -1,3 +1,6 @@
+## 2.0.0
+- Actually requires node22
+
 ## 1.7.1
 - Bug fix with Force not passing data when interating
 
